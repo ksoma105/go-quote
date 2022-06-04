@@ -1832,3 +1832,54 @@ func getAnonFTP(addr, port string, dir string, fname string) ([]byte, error) {
 
 	return contents, nil
 }
+
+type Symbol struct {
+	Exchange       string `json:"exchange"`
+	Shortname      string `json:"shortname"`
+	QuoteType      string `json:"quoteType"`
+	Symbol         string `json:"symbol"`
+	Index          string `json:"index"`
+	Score          int    `json:"score"`
+	TypeDisp       string `json:"typeDisp"`
+	Longname       string `json:"longname"`
+	ExchDisp       string `json:"exchDisp"`
+	Sector         string `json:"sector"`
+	Industry       string `json:"industry"`
+	DispSecIndFlag bool   `json:"dispSecIndFlag,omitempty"`
+	IsYahooFinance bool   `json:"isYahooFinance"`
+}
+
+func GetSymbolProfile(ticker string) (symbol Symbol, err error) {
+	type Symbols struct {
+		Quotes []struct {
+			Symbol
+		} `json:"quotes"`
+	}
+	var symbols Symbols
+	client := &http.Client{
+		Timeout: ClientTimeout,
+	}
+
+	url := fmt.Sprintf(
+		"https://query1.finance.yahoo.com/v1/finance/search?q=%s",
+		ticker)
+	resp, err := client.Get(url)
+	if err != nil {
+		Log.Printf("Serach request error %+v\n", err)
+		return symbol, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		Log.Printf("Read resp body error: %+v\n", err)
+	}
+	if err = json.Unmarshal(body, &symbols); err != nil {
+		Log.Printf("Can not Unmarshal JSON : %+v\n", err)
+	}
+	for _, v := range symbols.Quotes {
+		if v.Symbol.Symbol == ticker {
+			return v.Symbol, nil
+		}
+	}
+	return symbol, errors.New("symbol not found")
+}
