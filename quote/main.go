@@ -18,7 +18,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/markcheno/go-quote"
+	"github.com/ksoma105/go-quote"
 )
 
 var usage = `Usage:
