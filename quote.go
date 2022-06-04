@@ -1877,7 +1877,7 @@ func GetSymbolProfile(ticker string) (symbol Symbol, err error) {
 		Log.Printf("Can not Unmarshal JSON : %+v\n", err)
 	}
 	for _, v := range symbols.Quotes {
-		if v.Symbol.Symbol == ticker {
+		if strings.ToLower(v.Symbol.Symbol) == strings.ToLower(ticker) {
 			return v.Symbol, nil
 		}
 	}
